@@ -1,14 +1,19 @@
 import React from 'react';
-import { View, Text, ToastAndroid } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { Card, TextInput, Button } from 'react-native-paper';
 import { useState } from 'react';
 import { Formik } from 'formik';
 import * as Yup from "yup";
 
+
 const SignupSchema = Yup.object().shape({
   email: Yup.string()
   .email('Invalid email')
   .required('Enter valid email address'),
+  name: Yup.string()
+    .min(2, 'Too Short!')
+    .max(20, 'Too Long!')
+    .required('Enter valid name'),
   password: Yup.string()
     .min(8)
     .required('Enter your password')
@@ -20,6 +25,27 @@ const SignupSchema = Yup.object().shape({
     .required('Re-Enter your password')
 });
 
+const showToast = (message = "Something wen't wrong") => {
+  ToastAndroid.show(message, 3000);
+};
+
+async function test(credentials, navigation) {
+  const response = await fetch('http://192.168.0.4:8000/api/register', {method: 'POST', headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }, body: credentials
+})
+const data = await response.json()
+
+console.log(data)
+
+if(response.status == 200) {
+  Alert.alert("User created successfully", data.message)
+     return (navigation.replace('Login'))
+}
+
+if(response.status == 404) return Alert.alert(data.message);
+}
 
 const RegistrationPage = ({ navigation }) => {
     
@@ -34,17 +60,11 @@ const RegistrationPage = ({ navigation }) => {
     navigation.navigate('Login');
   };
 
-
-  
-
-  const handleLogin = async () => {
-    navigation.navigate('Login');
-  };
-
   return (
     <Formik
     initialValues={{ 
     email: '',
+    name: '',
     password: '',
     confirmPassword: '',
   }}
@@ -71,6 +91,16 @@ const RegistrationPage = ({ navigation }) => {
           />
           {touched.email && errors.email && (
                 <Text style={{color:'red'}} > {errors.email}</Text>
+              )}
+              <TextInput
+            label="Name"
+            value={values.name}
+            onChangeText={handleChange('name')}
+            onBlur={ handleBlur('name')}
+            style={{ marginBottom: 10 }}
+          />
+          {touched.name && errors.name && (
+                <Text style={{color:'red'}} > {errors.name}</Text>
               )}
           <TextInput
             label="Password"

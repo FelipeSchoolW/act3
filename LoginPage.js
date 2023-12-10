@@ -26,6 +26,24 @@ const LoginPage = ({ navigation }) => {
     ToastAndroid.show(message, 3000);
   };
 
+  async function test(credentials, navigation) {
+    const response = await fetch('http://192.168.0.4:8000/api/login', {method: 'POST', headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }, body: credentials
+  })
+  const data = await response.json()
+
+  console.log(data)
+
+  if(response.status == 200) {
+
+       return (navigation.replace('Home'))
+  }
+
+  if(response.status == 404) return Alert.alert(data.message);
+  }
+
   const goToLanding = () => {
     navigation.navigate('Landing');
   };
@@ -38,19 +56,11 @@ const LoginPage = ({ navigation }) => {
     navigation.navigate('AccountRecovery');
   };
   
-
-  const handleLogin = async () => 
-  {
-    
-
-
-    navigation.navigate('Home'); };
-
-
   return (
     <Formik
     initialValues={{ email: "", password: ""}}
     onSubmit={async (values) =>{
+      console.log(values)
       test(JSON.stringify(values), navigation)
     
     }}
